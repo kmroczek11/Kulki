@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "noImplicitAny": true,
+        "lib": [
+            "es6",
+            "dom",
+            "dom.iterable"
+        ],
+        "target": "es5",
+        "jsx": "react",
+        "allowJs": true
+    }
+}
