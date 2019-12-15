@@ -4,6 +4,8 @@ class Main {
 
     constructor() {
         board = new Board()
+        board.initializeBoard()
+        board.addClicks()
     }
 }
 
