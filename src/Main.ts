@@ -5,6 +5,9 @@ class Main {
     constructor() {
         board = new Board()
         board.initializeBoard()
+        board.createHelpBoard()
+        board.refreshHelpBoard()
+        board.createScoreboard()
         board.addClicks()
     }
 }

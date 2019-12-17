@@ -1,14 +1,40 @@
 table{
     display: flex;
-    border-collapse: collapse;
 }
 
 td{
     display: flex;
     justify-content: center;
     align-items: center;
-    width:120px;
-    height: 120px;
+    width:60px;
+    height: 60px;
     border:2px solid black;
-    font-size: 50px;
+    font-size: 30px;
+    margin-right:-2px;
+    margin-bottom: -2px;
+    transition: background-color 0.5s ease;
+}
+
+.helpBoard{
+    position: absolute;
+    top:0;
+    left: 600px;
+}
+
+.helpBoard td{
+    font-size: 20px;
+}
+
+.scoreboard{
+    position: absolute;
+    top:0;
+    left: 1200px;
+    display: flex;
+    width:100px;
+    height:100px;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    border:5px solid black;
+    border-radius: 100px;
 }

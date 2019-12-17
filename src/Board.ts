@@ -24,8 +24,13 @@ export default class Board {
   ];
   public selected: HTMLElement = null;
   public selectedColor: string;
+  public initialValue: number = this.width * this.height
+  public helpTable: HTMLElement
+  public points: number = 0
+  public ballsAmount: number = 3
+  public scoreBoard: HTMLElement = null
 
-  constructor() {}
+  constructor() { }
 
   initializeBoard = () => {
     this.A = [];
@@ -35,7 +40,7 @@ export default class Board {
       //wypełnienie tablicy A zerami
       this.A[i] = [];
       for (let j: number = 0; j < this.height; j++) {
-        this.A[i][j] = 0;
+        this.A[i][j] = this.initialValue;
       }
     }
 
@@ -61,30 +66,20 @@ export default class Board {
     }
     document.body.appendChild(this.table);
 
-    //this.refreshBoard()
-
-    // for (let i: number = 0; i < 3; i++) {
-    //     let randX: number = Math.floor((Math.random() * this.x) + 0);
-    //     let randY: number = Math.floor((Math.random() * this.y) + 0);
-    //     this.fillWithX(randX, randY)
-    // }
-
-    this.disperseBall(0, 1);
-    this.disperseBall(2, 1);
-    this.disperseBall(2, 3);
+    this.disperseBalls();
   };
 
   refreshBoardA = () => {
-    console.log("Odświeżenie tablicy A");
+    //console.log("Odświeżenie tablicy A");
     for (let i: number = 0; i < this.width; i++) {
       for (let j: number = 0; j < this.height; j++) {
-        if (typeof this.A[i][j] == "number") this.A[i][j] = 0;
+        if (typeof this.A[i][j] == "number") this.A[i][j] = this.initialValue;
       }
     }
   };
 
   refreshBoardB = () => {
-    console.log("Odświeżenie tablicy B");
+    //console.log("Odświeżenie tablicy B");
     for (let i: number = 0; i < this.width; i++) {
       for (let j: number = 0; j < this.height; j++) {
         this.B[i][j] = [""];
@@ -92,18 +87,22 @@ export default class Board {
     }
   };
 
-  disperseBall = (x: number, y: number) => {
-    let color: string = this.colors[Math.floor(Math.random() * 7 + 0)];
-    let ball = <HTMLElement>new Ball(color);
-
-    if (this.A[x][y] == "") {
-      this.A[x][y] = color;
-      let td = <HTMLElement>document.getElementsByClassName(x + "_" + y)[0];
-      td.appendChild(ball);
-    } else this.disperseBall(x, y);
-
-    //this.refreshBoard()
-  };
+  disperseBalls = () => {
+    let howMany: number = 0
+    while (howMany < this.ballsAmount) {
+      //let color: string = this.colors[Math.floor(Math.random() * 7 + 0)];
+      let color = "red"
+      let ball = <HTMLElement>new Ball(color);
+      let x: number = Math.floor((Math.random() * this.width) + 0);
+      let y: number = Math.floor((Math.random() * this.height) + 0);
+      if (this.A[x][y] == this.initialValue) {
+        this.A[x][y] = color;
+        let td = <HTMLElement>document.getElementsByClassName(x + "_" + y)[0];
+        td.appendChild(ball);
+        howMany++
+      }
+    }
+  }
 
   addClicks = () => {
     let tds = Array.from(document.getElementsByTagName("td"));
@@ -114,34 +113,82 @@ export default class Board {
     });
   };
 
+  getBoardCell = (cl: string, boardName: string) => {
+    var board = <HTMLElement>(document.getElementsByClassName(boardName)[0])
+    var tds = board.getElementsByTagName("td")
+    for (var i = 0; i < tds.length; i++) {
+      if (tds[i].className == cl) {
+        return <HTMLElement>tds[i]
+      }
+    }
+  }
+
+  removeBallsFromCells = (cells: string[]) => {
+    for (let i: number = 0; i < cells.length; i++){
+      let td: HTMLElement = this.getBoardCell(cells[i], "board")
+      td.innerHTML = ""
+    }
+  }
+
+  createHelpBoard = () => {
+    this.helpTable = document.createElement("table");
+    this.helpTable.classList.add("helpBoard");
+    for (let i: number = 0; i < this.width; i++) {
+      let tr: HTMLElement = document.createElement("tr");
+      for (let j: number = 0; j < this.height; j++) {
+        let td = document.createElement("td");
+        td.classList.add(i + "_" + j);
+        tr.appendChild(td);
+      }
+      this.helpTable.appendChild(tr);
+    }
+    document.body.appendChild(this.helpTable);
+  }
+
+  refreshHelpBoard = () => {
+    for (let i: number = 0; i < this.width; i++) {
+      for (let j: number = 0; j < this.height; j++) {
+        this.getBoardCell(i + "_" + j, "helpBoard").innerHTML = this.A[i][j].toString();
+      }
+    }
+  }
+
+  createScoreboard = () => {
+    this.scoreBoard = document.createElement("div")
+    this.scoreBoard.classList.add("scoreboard")
+    this.scoreBoard.innerHTML = this.points.toString()
+    document.body.appendChild(this.scoreBoard)
+  }
+
   addStartOrMeta = (c: string) => {
     let x: number = parseInt(c.split("_")[0]);
     let y: number = parseInt(c.split("_")[1]);
-    console.log(x, y);
-    if (this.A[x][y] != 0) {
+    //console.log(x, y);
+    if (this.A[x][y] != this.initialValue) {
       if (this.status == "S") {
         // console.log("Pole z kulką i wybieranie");
         // console.log("X i Y startu: ", x, y);
         this.selected = <HTMLElement>(
-          document.getElementsByClassName(x + "_" + y)[0].firstChild
+          this.getBoardCell(x + "_" + y, "board").firstChild
         );
+        console.log("Wybrana kulka: ", this.selected)
         this.selectedColor = this.selected.classList[0];
-        this.selected.style.width = "120px";
-        this.selected.style.height = "120px";
+        this.selected.style.width = "60px";
+        this.selected.style.height = "60px";
         this.startsX = x;
         this.startsY = y;
         this.status = "M";
       } else {
         // console.log("Pole z kulką i zmiana wybranej");
         // console.log("X i Y startu: ", x, y);
-        this.selected.style.width = "80px";
-        this.selected.style.height = "80px";
+        this.selected.style.width = "40px";
+        this.selected.style.height = "40px";
         this.selected = <HTMLElement>(
-          document.getElementsByClassName(x + "_" + y)[0].firstChild
+          this.getBoardCell(x + "_" + y, "board").firstChild
         );
         this.selectedColor = this.selected.classList[0];
-        this.selected.style.width = "120px";
-        this.selected.style.height = "120px";
+        this.selected.style.width = "60px";
+        this.selected.style.height = "60px";
         this.startsX = x;
         this.startsY = y;
       }
@@ -149,20 +196,20 @@ export default class Board {
       if (this.status == "M") {
         this.metasX = x;
         this.metasY = y;
-        // console.log("X i Y mety: ", x, y);
         this.A[x][y] = "M";
         this.algorithm = new Algorithm();
         this.algorithm.createPath(this.startsX, this.startsY, 0);
       }
     }
+    this.refreshHelpBoard()
   };
 
   colorFields = (fields: string[], color: string) => {
     console.log("Zmiana koloru ścieżki na: ", color);
     fields = fields.filter(field => field != "");
-    console.log(fields)
+    //console.log(fields)
     for (let i: number = 0; i < fields.length; i++) {
-      let td = document.getElementsByClassName(fields[i])[0] as HTMLElement;
+      let td = this.getBoardCell(fields[i], "board")
       td.style.backgroundColor = color;
     }
   };

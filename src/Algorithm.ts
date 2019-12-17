@@ -3,7 +3,7 @@ import Directions from "./Directions";
 
 export default class Algorithm {
   public found: boolean = false;
-  private calls: number = 0;
+  public calls: number = 0;
   private directions: Directions;
 
   constructor() {
@@ -12,41 +12,34 @@ export default class Algorithm {
   }
 
   createPath = (x: number, y: number, pathLength: number) => {
-    this.calls += 1;
-    console.log("Wywołanie nr: ", this.calls);
-
-    console.log("X: ", x, " Y: ", y, " Długość: ", pathLength);
 
     pathLength = pathLength + 1;
 
-    if (board.metasX < board.startsX && board.metasY <= board.startsY) {
-      //lewy górny
-      this.directions.checkDirection(x, y, "top", pathLength);
-      this.directions.checkDirection(x, y, "left", pathLength);
-    } else if (board.metasX >= board.startsX && board.metasY < board.startsY) {
-      //lewy dolny
-      this.directions.checkDirection(x, y, "right", pathLength);
-      this.directions.checkDirection(x, y, "top", pathLength);
-    } else if (board.metasX < board.startsX && board.metasY >= board.startsY) {
-      //prawy dolny
-      this.directions.checkDirection(x, y, "left", pathLength);
-      this.directions.checkDirection(x, y, "bottom", pathLength);
-    } else if (board.metasX >= board.startsX && board.metasY >= board.startsY) {
-      //prawy górny
-      this.directions.checkDirection(x, y, "right", pathLength);
-      this.directions.checkDirection(x, y, "bottom", pathLength);
-    }
+    var f: any = []
 
-    console.log(board.B);
+    f.push([
+      this.directions.checkDirection(x, y, "top", pathLength),
+      this.directions.checkDirection(x, y, "left", pathLength),
+      this.directions.checkDirection(x, y, "right", pathLength),
+      this.directions.checkDirection(x, y, "bottom", pathLength)])
 
-    if (!this.found && this.calls < Math.pow(board.width, 3)) {
-      for (let i: number = 0; i < board.width; i++) {
-        for (let j: number = 0; j < board.height; j++) {
-          if (board.A[i][j] == pathLength) {
-            this.createPath(i, j, pathLength);
-          }
+    do {
+      this.calls += 1;
+      //console.log("Wywołanie nr: ", this.calls);
+
+      var functionFlatArray: any = []
+      f.forEach((arrOfFunc: any) => functionFlatArray = functionFlatArray.concat(arrOfFunc))
+
+      var f2: any = []
+
+      functionFlatArray.forEach((func: any) => {
+        if (func != undefined) {
+          f2.push(func())
         }
-      }
-    }
+      })
+
+      f = f2
+    } while (f.length > 0)    
+
   };
 }
