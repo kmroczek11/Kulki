@@ -51,9 +51,9 @@ export default class Directions {
         this.restartBoards(x, y, startingX, startingY);
       }
 
-      // else if (board.colors.includes(board.A[startingX][startingY] as string)) {
-      //   // console.log("kulka!", x, y, direction, board.A[startingX][startingY])
-      // }
+      else if (board.colors.includes(board.A[startingX][startingY] as string)) {
+        // console.log("kulka!", x, y, direction, board.A[startingX][startingY])
+      }
 
       else if (board.A[startingX][startingY] > pathLength) {
         board.A[startingX][startingY] = pathLength;
@@ -80,8 +80,8 @@ export default class Directions {
   };
 
   restartBoards = (x: number, y: number, startingX: number, startingY: number) => {
-    console.log("Tablica A: ", board.A)
-    console.log("Tablica B:", board.B)
+    //console.log("Tablica A: ", board.A)
+    //console.log("Tablica B:", board.B)
     let start = <HTMLElement>(
       document.getElementsByClassName(board.startsX + "_" + board.startsY)[0]
     );
@@ -96,75 +96,191 @@ export default class Directions {
     board.selected.style.height = "40px";
     board.selected = null;
     board.status = "S";
-    board.algorithm.found = false
+
+    this.checkRows(startingX, startingY)
 
     board.colorFields(board.B[x][y], "pink");
 
-    board.disperseBalls()
+    board.refreshBoardA();
 
-    this.checkHorizontalRow(startingX, startingY)
+    board.refreshUpcomingBallsBoard()
+
+    board.disperseBalls(board.upcomingColors)
+
+    board.refreshHelpBoard()
 
     setTimeout(() => {
       board.colorFields(board.B[x][y], "white")
-      board.refreshBoardA();
-      board.refreshHelpBoard()
       board.refreshBoardB();
     }, 1000);
   };
 
-  checkHorizontalRow = (x: number, y: number) => {
-    let balls: string[] = []
-    let allX: number[] = []
-    let sum: number = 0
-    let start: number = x - this.inRow
-    let finish: number = x + this.inRow
-    if (start < 0) start = 0
-    if (finish > board.width) finish = board.width
-    for (let i: number = start; i < finish; i++) {
-      console.log(i, " ", y)
-      if (board.A[i][y] == board.selectedColor) {
-        balls.push(i + "_" + y)
-        allX.push(i)
-        sum++
+  checkRows = (x: number, y: number) => {
+    //console.log("PUNKT: ", x, y)
+    let horizontalPoints: string[] = []
+    let verticalPoints: string[] = []
+    let obliqueLeftPoints: string[] = []
+    let obliqueRightPoints: string[] = []
+
+    let i = x
+    let j = y
+    let leftHorizontalCounter = 0
+    while (i >= 0) {
+      if (i != x) {
+        console.log("W lewo w poziomie: ", i, j)
+        if (board.A[i][j] == board.selectedColor) {
+          horizontalPoints.push(i + "_" + j)
+          leftHorizontalCounter++
+        } else {
+          break;
+        }
       }
+      i--
     }
 
-    if (sum == 5) {
-      board.removeBallsFromCells(balls)
-      for (let i: number = 0; i < allX.length; i++) {
-        board.A[allX[i]][y] = board.initialValue
+    i = x
+    j = y
+    let rightHorizontalCounter = 0
+    while (i < board.width) {
+      if (i != x) {
+        //console.log("W prawo w poziomie: ", i, j)
+        if (board.A[i][j] == board.selectedColor) {
+          horizontalPoints.push(i + "_" + j)
+          rightHorizontalCounter++
+        } else {
+          break;
+        }
       }
-      board.refreshHelpBoard()
-      board.points += sum
-    }
-    this.checkVerticalRow(x, y)
-  }
-
-  checkVerticalRow = (x: number, y: number) => {
-    let balls: string[] = []
-    let allY: number[] = []
-    let sum: number = 0
-    let start: number = y - this.inRow
-    let finish: number = y + this.inRow
-    if (start < 0) start = 0
-    if (finish > board.height) finish = board.height
-    for (let i: number = start; i < finish; i++) {
-      console.log(x, " ", i)
-      if (board.A[x][i] == board.selectedColor) {
-        balls.push(x + "_" + i)
-        allY.push(i)
-        sum++
-      }
+      i++
     }
 
-    if (sum == 5) {
-      board.removeBallsFromCells(balls)
-      for (let i: number = 0; i < allY.length; i++) {
-        board.A[x][allY[i]] = board.initialValue
+    i = x
+    j = y
+    let topVerticalCounter = 0
+    while (j >= 0) {
+      if (j != y) {
+        //console.log("W górę w pionie: ", i, j)
+        if (board.A[i][j] == board.selectedColor) {
+          verticalPoints.push(i + "_" + j)
+          topVerticalCounter++
+        } else {
+          break;
+        }
       }
-      board.refreshHelpBoard()
-      board.points += sum
+      j--
     }
+
+    i = x
+    j = y
+    let bottomVerticalCounter = 0
+    while (j < board.height) {
+      if (j != y) {
+        //console.log("W doł w pionie: ", i, j)
+        if (board.A[i][j] == board.selectedColor) {
+          verticalPoints.push(i + "_" + j)
+          bottomVerticalCounter++
+        } else {
+          break;
+        }
+      }
+      j++
+    }
+
+    i = x
+    j = y
+    let leftTopCounter = 0
+    while (i >= 0 && j >= 0) {
+      if (i != x) {
+        //console.log("Na skos w lewo w górę: ", i, j)
+        if (board.A[i][j] == board.selectedColor) {
+          obliqueLeftPoints.push(i + "_" + j)
+          leftTopCounter++
+        } else {
+          break;
+        }
+      }
+      i--
+      j--
+    }
+
+    i = x
+    j = y
+    let rightTopCounter = 0
+    while (i < board.width && j >= 0) {
+      if (i != x) {
+        //console.log("Na skos w prawo w górę: ", i, j)
+        if (board.A[i][j] == board.selectedColor) {
+          obliqueRightPoints.push(i + "_" + j)
+          rightTopCounter++
+        } else {
+          break;
+        }
+      }
+      i++
+      j--
+    }
+
+    i = x
+    j = y
+    let leftBottomCounter = 0
+    while (i >= 0 && j < board.height) {
+      if (j != y) {
+        //console.log("Na skos w lewo w doł: ", i, j)
+        if (board.A[i][j] == board.selectedColor) {
+          obliqueRightPoints.push(i + "_" + j)
+          leftBottomCounter++
+        } else {
+          break;
+        }
+
+      }
+      i--
+      j++
+    }
+
+    i = x
+    j = y
+    let rightBottomCounter = 0
+    while (i < board.width && j < board.height) {
+      if (j != y) {
+        //console.log("Na skos w prawo w doł: ", i, j)
+        if (board.A[i][j] == board.selectedColor) {
+          obliqueLeftPoints.push(i + "_" + j)
+          rightBottomCounter++
+        } else {
+          break;
+        }
+      }
+      i++
+      j++
+    }
+
+    let pointsSum: number = 0
+    let allPoints: string[] = []
+
+    if (horizontalPoints.length >= this.inRow - 1) {
+      allPoints = [...horizontalPoints]
+    }
+
+    if (verticalPoints.length >= this.inRow - 1) {
+      allPoints = [...verticalPoints]
+    }
+
+    if (obliqueLeftPoints.length >= this.inRow - 1) {
+      allPoints = [...obliqueLeftPoints]
+    }
+
+    if (obliqueRightPoints.length >= this.inRow - 1) {
+      allPoints = [...obliqueRightPoints]
+    }
+
+    if (allPoints.length > 0) {
+      allPoints.push(x + "_" + y)
+      board.clearSpecificPoints(allPoints)
+      board.removeBallsFromCells(allPoints)
+      board.points += allPoints.length
+    }
+
     board.scoreBoard.innerHTML = board.points.toString()
   }
 }

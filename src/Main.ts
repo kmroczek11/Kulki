@@ -8,6 +8,7 @@ class Main {
         board.createHelpBoard()
         board.refreshHelpBoard()
         board.createScoreboard()
+        board.createUpcomingBallsBoard()
         board.addClicks()
     }
 }

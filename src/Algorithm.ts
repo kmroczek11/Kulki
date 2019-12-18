@@ -12,7 +12,8 @@ export default class Algorithm {
   }
 
   createPath = (x: number, y: number, pathLength: number) => {
-
+    this.found = false
+    
     pathLength = pathLength + 1;
 
     var f: any = []
@@ -39,7 +40,11 @@ export default class Algorithm {
       })
 
       f = f2
-    } while (f.length > 0)    
+    } while (f.length > 0)
+
+    if (!this.found){
+      console.log("Brak dojścia")
+    }
 
   };
 }

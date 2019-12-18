@@ -12,7 +12,7 @@ td{
     font-size: 30px;
     margin-right:-2px;
     margin-bottom: -2px;
-    transition: background-color 0.5s ease;
+    transition: background-color 1s ease;
 }
 
 .helpBoard{
@@ -37,4 +37,14 @@ td{
     font-size: 40px;
     border:5px solid black;
     border-radius: 100px;
+}
+
+.upcomingBallsBoard{
+    position: absolute;
+    top:0;
+    left: 1400px;
+    display:flex;
+    flex-direction: row;
+    justify-content:space-between;
+    border:2px solid black;
 }
