@@ -44,6 +44,7 @@ export default class Algorithm {
 
     if (!this.found){
       console.log("Brak dojścia")
+      board.moveBall = false
     }
 
   };

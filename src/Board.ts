@@ -13,15 +13,15 @@ export default class Board {
   public startsY: number;
   public metasX: number;
   public metasY: number;
-  public algorithm: Algorithm;
+  public algorithm: Algorithm = new Algorithm();
   public colors: string[] = [
     "red",
     "orange",
     "yellow",
-    "green",
-    "blue",
-    "black",
-    "violet"
+    // "green",
+    // "blue",
+    // "black",
+    // "violet"
   ];
   public selected: HTMLElement = null;
   public selectedColor: string;
@@ -34,6 +34,10 @@ export default class Board {
   public upcomingBallsBoard: HTMLElement
   public allFields: { id: number, x: number, y: number }[] = [];
   public calls: number = 0
+  public trackToField: string = ""
+  public selectedFieldBefore: string = ""
+  public recoveredFieldValue: (number | string)
+  public moveBall: boolean = false
 
   constructor() { }
 
@@ -78,7 +82,7 @@ export default class Board {
   getRandomColors = () => {
     this.upcomingColors = []
     for (let i: number = 0; i < this.ballsAmount; i++) {
-      this.upcomingColors.push(this.colors[Math.floor(Math.random() * 7 + 0)])
+      this.upcomingColors.push(this.colors[Math.floor(Math.random() * this.colors.length + 0)])
     }
     //console.log(this.upcomingColors)
   }
@@ -99,6 +103,7 @@ export default class Board {
         this.B[i][j] = [""];
       }
     }
+    //console.log("Tablica B po odświeżeniu: ", this.B)
   };
 
   disperseBalls = (colors: string[]) => {
@@ -138,26 +143,8 @@ export default class Board {
       console.warn("Wywołań", this.calls)
       this.getRandomColors()
     } else {
-      console.log("Koniec gry")
+      alert("Koniec gry")
     }
-  }
-
-  addClicks = () => {
-    let tds = Array.from(document.getElementsByTagName("td"));
-    tds.forEach(td => {
-      td.addEventListener("click", () => {
-        this.addStartOrMeta(td.className);
-      });
-    });
-  };
-
-  addHovers = () => {
-    let tds = Array.from(document.getElementsByTagName("td"));
-    tds.forEach(td => {
-      td.addEventListener("mousenter", () => {
-        //this.setRoute(td.className);
-      });
-    });
   }
 
   getBoardCell = (cl: string, boardName: string) => {
@@ -230,19 +217,59 @@ export default class Board {
 
   refreshUpcomingBallsBoard = () => {
     this.upcomingBallsBoard.innerHTML = ""
+    let title: HTMLElement = document.createElement("p")
+    title.innerHTML = "Następne: "
+    this.upcomingBallsBoard.appendChild(title)
     for (let i: number = 0; i < this.upcomingColors.length; i++) {
       let ball = <HTMLElement>new Ball(this.upcomingColors[i]);
       this.upcomingBallsBoard.appendChild(ball)
     }
   }
 
+  trackPath = (c: string) => {
+    let x: number = parseInt(c.split("_")[0]);
+    let y: number = parseInt(c.split("_")[1]);
+    if (this.status == "M" && !board.colors.includes(board.A[x][y] as string)) {
+      if (this.trackToField != "") {
+        let x: number = parseInt(this.trackToField.split("_")[0])
+        let y: number = parseInt(this.trackToField.split("_")[1])
+        this.A[x][y] = this.recoveredFieldValue
+        this.colorFields(this.B[parseInt(this.selectedFieldBefore.split("_")[0])][parseInt(this.selectedFieldBefore.split("_")[1])], "white")
+        this.refreshBoardA()
+        this.refreshBoardB();
+      }
+      this.trackToField = c
+      this.recoveredFieldValue = this.A[x][y]
+      this.A[x][y] = "M"
+      this.algorithm.createPath(this.startsX, this.startsY, 0);
+    }
+  }
+
+  addHovers = () => {
+    let tds = Array.from(document.getElementsByTagName("td"));
+    tds.forEach(td => {
+      td.addEventListener("mouseenter", () => {
+        this.trackPath(td.className);
+      });
+    });
+  }
+
+  addClicks = () => {
+    let tds = Array.from(document.getElementsByTagName("td"));
+    tds.forEach(td => {
+      td.addEventListener("click", () => {
+        this.addStartOrMeta(td.className);
+      });
+    });
+  };
+
   addStartOrMeta = (c: string) => {
     let x: number = parseInt(c.split("_")[0]);
     let y: number = parseInt(c.split("_")[1]);
     //console.log(x, y);
-    if (this.A[x][y] != this.initialValue) {
+    if (this.A[x][y] != "M") {
       if (this.status == "S") {
-        // console.log("Pole z kulką i wybieranie");
+        console.log("Pole z kulką i wybieranie");
         // console.log("X i Y startu: ", x, y);
         this.selected = <HTMLElement>(
           this.getBoardCell(x + "_" + y, "board").firstChild
@@ -255,7 +282,8 @@ export default class Board {
         this.startsY = y;
         this.status = "M";
       } else {
-        // console.log("Pole z kulką i zmiana wybranej");
+        console.log("Pole z kulką i zmiana wybranej");
+        this.colorFields(this.B[parseInt(this.selectedFieldBefore.split("_")[0])][parseInt(this.selectedFieldBefore.split("_")[1])], "white")
         // console.log("X i Y startu: ", x, y);
         this.selected.style.width = "40px";
         this.selected.style.height = "40px";
@@ -270,14 +298,14 @@ export default class Board {
       }
     } else {
       if (this.status == "M") {
+        console.log("Przemieszczenie kulki")
         this.metasX = x;
         this.metasY = y;
-        this.A[x][y] = "M";
-        this.algorithm = new Algorithm();
+        this.moveBall = true
+        this.refreshBoardA()
         this.algorithm.createPath(this.startsX, this.startsY, 0);
       }
     }
-    this.refreshHelpBoard()
   };
 
   colorFields = (fields: string[], color: string) => {

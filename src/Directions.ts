@@ -46,9 +46,15 @@ export default class Directions {
 
         board.B[x][y].push(startingX.toString() + "_" + startingY.toString());
 
+        board.selectedFieldBefore = x.toString() + "_" + y.toString()
+
         board.B[x][y].push(x.toString() + "_" + y.toString());
 
-        this.restartBoards(x, y, startingX, startingY);
+        //console.log("Pola do pokolorowania: ", board.B[x][y])
+        board.colorFields(board.B[x][y], "pink")
+
+        if (board.moveBall)
+          this.restartBoards(x, y, startingX, startingY);
       }
 
       else if (board.colors.includes(board.A[startingX][startingY] as string)) {
@@ -56,11 +62,10 @@ export default class Directions {
       }
 
       else if (board.A[startingX][startingY] > pathLength) {
+
         board.A[startingX][startingY] = pathLength;
 
-        board.B[startingX][startingY] = board.B[startingX][startingY].concat(
-          board.B[x][y]
-        );
+        board.B[startingX][startingY] = board.B[startingX][startingY].concat(board.B[x][y])
 
         board.B[startingX][startingY].push(x.toString() + "_" + y.toString());
 
@@ -76,10 +81,11 @@ export default class Directions {
         }
       }
     }
-    board.refreshHelpBoard()
+    //board.refreshHelpBoard()
   };
 
   restartBoards = (x: number, y: number, startingX: number, startingY: number) => {
+    console.log("Restartowanie boarda")
     //console.log("Tablica A: ", board.A)
     //console.log("Tablica B:", board.B)
     let start = <HTMLElement>(
@@ -96,10 +102,10 @@ export default class Directions {
     board.selected.style.height = "40px";
     board.selected = null;
     board.status = "S";
+    board.moveBall = false
+    board.trackToField = ""
 
     this.checkRows(startingX, startingY)
-
-    board.colorFields(board.B[x][y], "pink");
 
     board.refreshBoardA();
 
@@ -107,12 +113,12 @@ export default class Directions {
 
     board.disperseBalls(board.upcomingColors)
 
-    board.refreshHelpBoard()
+    //board.refreshHelpBoard()
 
     setTimeout(() => {
       board.colorFields(board.B[x][y], "white")
       board.refreshBoardB();
-    }, 1000);
+    }, 100);
   };
 
   checkRows = (x: number, y: number) => {
@@ -255,23 +261,22 @@ export default class Directions {
       j++
     }
 
-    let pointsSum: number = 0
     let allPoints: string[] = []
-
+    console.log("Długości tablic(poziom, pion, lewy ukos, prawy ukos): ", horizontalPoints.length, verticalPoints.length, obliqueLeftPoints.length, obliqueRightPoints.length)
     if (horizontalPoints.length >= this.inRow - 1) {
-      allPoints = [...horizontalPoints]
+      allPoints.push(...horizontalPoints)
     }
 
     if (verticalPoints.length >= this.inRow - 1) {
-      allPoints = [...verticalPoints]
+      allPoints.push(...verticalPoints)
     }
 
     if (obliqueLeftPoints.length >= this.inRow - 1) {
-      allPoints = [...obliqueLeftPoints]
+      allPoints.push(...obliqueLeftPoints)
     }
 
     if (obliqueRightPoints.length >= this.inRow - 1) {
-      allPoints = [...obliqueRightPoints]
+      allPoints.push(...obliqueRightPoints)
     }
 
     if (allPoints.length > 0) {

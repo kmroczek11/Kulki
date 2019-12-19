@@ -6,7 +6,8 @@
             "es6",
             "dom",
             "dom.iterable",
-            "es2017"
+            "es2017",
+            "es2019"
         ],
         "target": "es5",
         "jsx": "react",

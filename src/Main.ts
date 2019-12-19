@@ -5,11 +5,12 @@ class Main {
     constructor() {
         board = new Board()
         board.initializeBoard()
-        board.createHelpBoard()
-        board.refreshHelpBoard()
+        //board.createHelpBoard()
+        //board.refreshHelpBoard()
         board.createScoreboard()
         board.createUpcomingBallsBoard()
         board.addClicks()
+        board.addHovers()
     }
 }
 

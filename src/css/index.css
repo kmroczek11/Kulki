@@ -12,7 +12,10 @@ td{
     font-size: 30px;
     margin-right:-2px;
     margin-bottom: -2px;
-    transition: background-color 1s ease;
+}
+
+.board{
+    cursor: pointer;
 }
 
 .helpBoard{
@@ -28,7 +31,7 @@ td{
 .scoreboard{
     position: absolute;
     top:0;
-    left: 1200px;
+    left: 600px;
     display: flex;
     width:100px;
     height:100px;
@@ -42,9 +45,10 @@ td{
 .upcomingBallsBoard{
     position: absolute;
     top:0;
-    left: 1400px;
+    left: 800px;
     display:flex;
     flex-direction: row;
-    justify-content:space-between;
+    justify-content: center;
+    align-items: center;
     border:2px solid black;
 }
